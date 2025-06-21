@@ -11,6 +11,7 @@ A mini-framework for rapid application development with integrated payment proce
 - 🔒 **Security** - Built-in security middleware and best practices
 - 🚀 **TypeScript** - Full TypeScript support for type safety
 - 📱 **Mobile Payments** - Native Apple Pay and Google Pay integration
+- 👨‍💼 **Admin Panel** - Built-in admin dashboard for user and payment management
 
 ## Quick Start
 

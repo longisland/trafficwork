@@ -11,6 +11,7 @@
    - [Analytics Tracking](#analytics-tracking)
    - [Database](#database)
    - [API Routes](#api-routes)
+   - [Admin Panel](#admin-panel)
 5. [Deployment](#deployment)
 6. [Troubleshooting](#troubleshooting)
 7. [API Reference](#api-reference)
@@ -125,6 +126,9 @@ The framework uses environment variables for configuration. Here are the key var
 - `CORS_ORIGIN`: Allowed CORS origins
 - `RATE_LIMIT_WINDOW_MS`: Rate limit window in milliseconds
 - `RATE_LIMIT_MAX_REQUESTS`: Maximum requests per window
+
+#### Admin Configuration
+- `ADMIN_EMAIL`: Email address for admin access
 
 ### Stripe Setup
 
@@ -383,6 +387,97 @@ The framework provides pre-built API routes for common operations.
 
 #### Webhook Routes:
 - `POST /api/webhook/stripe` - Stripe webhook handler
+
+### Admin Panel
+
+The framework includes a comprehensive admin panel for managing users, monitoring payments, and analyzing conversions.
+
+#### Key Features:
+- Dashboard with real-time statistics
+- User management with search and pagination
+- Payment analytics with revenue charts
+- Conversion funnel visualization
+- System logs and webhook monitoring
+- Data export functionality
+
+#### Setup:
+
+1. **Configure Admin Email**:
+   Set the admin email in your `.env` file:
+   ```
+   ADMIN_EMAIL=admin@example.com
+   ```
+
+2. **Access Admin Panel**:
+   - Navigate to `/admin.html` in your browser
+   - Login with admin credentials
+   - Only users with the configured admin email can access
+
+#### Admin API Endpoints:
+
+##### Dashboard & Analytics:
+- `GET /api/admin/dashboard` - Dashboard statistics
+- `GET /api/admin/analytics/payments` - Payment analytics
+- `GET /api/admin/analytics/conversions` - Conversion analytics
+
+##### User Management:
+- `GET /api/admin/users` - List all users (paginated)
+- `GET /api/admin/users/:userId` - User details
+- `PUT /api/admin/users/:userId/subscription` - Update subscription
+- `DELETE /api/admin/users/:userId` - Delete user
+
+##### System Management:
+- `GET /api/admin/logs` - System logs
+- `POST /api/admin/tracking/retry` - Retry failed tracking events
+- `GET /api/admin/export/users` - Export users to CSV
+
+#### Admin Panel Usage:
+
+```typescript
+import { requireAdmin, createAdminRoutes } from 'trafficwork-framework';
+
+// Add custom admin routes
+const adminRouter = createAdminRoutes();
+
+// Add custom admin endpoint
+adminRouter.get('/custom-report', requireAdmin, async (req, res) => {
+  // Your custom admin logic
+  const report = await generateCustomReport();
+  res.json(report);
+});
+```
+
+#### Security Considerations:
+
+1. **Access Control**: Only users with the admin email can access admin routes
+2. **Rate Limiting**: Admin routes are subject to rate limiting
+3. **Audit Trail**: All admin actions are logged
+4. **HTTPS Required**: Always use HTTPS in production
+
+#### Customizing the Admin Panel:
+
+The admin panel HTML template is located at `templates/app-template/public/admin.html`. You can customize:
+
+- Dashboard layout and statistics
+- Chart types and visualizations
+- Table columns and filters
+- Color scheme and branding
+
+Example customization:
+```javascript
+// Add custom chart to dashboard
+const customChart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: customLabels,
+    datasets: [{
+      label: 'Custom Metric',
+      data: customData,
+      backgroundColor: '#9b59b6'
+    }]
+  }
+});
+```
 
 ## Deployment
 

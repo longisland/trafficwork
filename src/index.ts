@@ -230,5 +230,6 @@ export * from './core/auth';
 export * from './core/payment';
 export * from './core/analytics';
 export * from './core/api';
+export * from './core/admin';
 export * from './middleware';
 export * from './utils/logger';

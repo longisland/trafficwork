@@ -2,6 +2,7 @@ export * from './routes';
 
 import { Express, Request, Response, NextFunction } from 'express';
 import { createApiRoutes } from './routes';
+import { createAdminRoutes } from '../admin';
 import { KeitaroService } from '../analytics';
 
 /**
@@ -13,6 +14,9 @@ export function setupApi(app: Express): void {
 
   // Mount API routes
   app.use('/api', createApiRoutes());
+
+  // Mount admin routes
+  app.use('/api/admin', createAdminRoutes());
 
   // 404 handler for API routes
   app.use('/api/*', (req: Request, res: Response) => {
@@ -147,6 +151,26 @@ export const apiDocs = {
     },
     webhook: {
       stripe: 'POST /webhook/stripe'
+    },
+    admin: {
+      dashboard: 'GET /admin/dashboard',
+      users: {
+        list: 'GET /admin/users',
+        details: 'GET /admin/users/:userId',
+        updateSubscription: 'PUT /admin/users/:userId/subscription',
+        delete: 'DELETE /admin/users/:userId'
+      },
+      analytics: {
+        payments: 'GET /admin/analytics/payments',
+        conversions: 'GET /admin/analytics/conversions'
+      },
+      logs: 'GET /admin/logs',
+      tracking: {
+        retry: 'POST /admin/tracking/retry'
+      },
+      export: {
+        users: 'GET /admin/export/users'
+      }
     }
   }
 };
