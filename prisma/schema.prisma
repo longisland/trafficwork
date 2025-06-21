@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  password          String
+  name              String?
+  
+  // Stripe integration
+  stripeCustomerId  String?   @unique
+  
+  // Subscription status
+  subscriptionId    String?
+  subscriptionStatus String?  @default("inactive") // active, inactive, canceled, past_due
+  subscriptionPlan  String?   // monthly, annual
+  subscriptionEndDate DateTime?
+  
+  // Tracking
+  keitaroSubId     String?   // Click ID from Keitaro
+  registrationSource String?  // Source of registration
+  
+  // Timestamps
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  lastLoginAt      DateTime?
+  
+  // Relations
+  payments         Payment[]
+  sessions         Session[]
+  
+  @@index([email])
+  @@index([stripeCustomerId])
+  @@index([keitaroSubId])
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([token])
+  @@index([userId])
+}
+
+model Payment {
+  id               String    @id @default(uuid())
+  userId           String
+  
+  // Stripe payment details
+  stripePaymentId  String    @unique
+  amount           Int       // Amount in cents
+  currency         String    @default("USD")
+  status           String    // succeeded, pending, failed
+  paymentMethod    String?   // card, apple_pay, google_pay
+  
+  // Tracking
+  keitaroSubId     String?   // For conversion tracking
+  
+  // Timestamps
+  createdAt        DateTime  @default(now())
+  
+  user             User      @relation(fields: [userId], references: [id])
+  
+  @@index([userId])
+  @@index([stripePaymentId])
+}
+
+model WebhookEvent {
+  id               String    @id @default(uuid())
+  source           String    // stripe, keitaro
+  eventId          String    @unique
+  eventType        String
+  payload          Json
+  processed        Boolean   @default(false)
+  processedAt      DateTime?
+  error            String?
+  createdAt        DateTime  @default(now())
+  
+  @@index([eventId])
+  @@index([source, processed])
+}
+
+model TrackingEvent {
+  id               String    @id @default(uuid())
+  userId           String?
+  eventType        String    // registration, purchase, custom
+  subId            String?   // Keitaro click ID
+  status           String?   // reg, sale, etc.
+  amount           Int?      // For purchase events
+  currency         String?
+  metadata         Json?
+  sentToTracker    Boolean   @default(false)
+  sentAt           DateTime?
+  createdAt        DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([subId])
+  @@index([eventType])
+}
